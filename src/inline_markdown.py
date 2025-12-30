@@ -80,8 +80,12 @@ def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
 
         for match in matches:
             before, after = text.split(f"![{match[0]}]({match[1]})", 1)
-            new_nodes.append(TextNode(before, TextType.TEXT))
+
+            if before:
+                new_nodes.append(TextNode(before, TextType.TEXT))
+
             new_nodes.append(TextNode(match[0], TextType.IMAGE, match[1]))
+
             text = after
 
         if text:
