@@ -44,8 +44,6 @@ def generate_page(from_path: str, template_path: str, dest_path: str):
 
     html_node = markdown_to_html_node(markdown)
 
-    print(html_node)
-
     content = html_node.to_html()
 
     title = extract_title(markdown)
