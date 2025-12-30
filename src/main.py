@@ -19,12 +19,12 @@ def copy_static_files(target_dir: str):
             if os.path.isdir(os.path.join(current_dir, file)):
                 queue.append(os.path.join(current_dir, file))
             else:
-                target_dir = os.path.join(target_dir, current_dir.replace("static", "").lstrip("/"))
+                final_target_dir = os.path.join(target_dir, current_dir.replace("static", "").lstrip("/"))
 
-                if not os.path.exists(target_dir):
-                    os.makedirs(target_dir)
+                if not os.path.exists(final_target_dir):
+                    os.makedirs(final_target_dir)
 
-                shutil.copy(os.path.join(current_dir, file), os.path.join(target_dir, file))
+                shutil.copy(os.path.join(current_dir, file), os.path.join(final_target_dir, file))
 
 def extract_title(markdown: str) -> str:
     lines = markdown.split("\n")
