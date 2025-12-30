@@ -61,3 +61,57 @@ def extract_markdown_images(text: str) -> list[str]:
 
 def extract_markdown_links(text: str) -> list[str]:
     return re.findall(r"\[(.+?)\]\((.+?)\)", text)
+
+def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
+    new_nodes = []
+
+    for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            new_nodes.append(node)
+            continue
+
+        text = node.text
+
+        matches = extract_markdown_images(text)
+
+        if not matches:
+            new_nodes.append(node)
+            continue
+
+        for match in matches:
+            before, after = text.split(f"![{match[0]}]({match[1]})", 1)
+            new_nodes.append(TextNode(before, TextType.TEXT))
+            new_nodes.append(TextNode(match[0], TextType.IMAGE, match[1]))
+            text = after
+
+        if text:
+            new_nodes.append(TextNode(text, TextType.TEXT))
+
+    return new_nodes
+
+def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
+    new_nodes = []
+
+    for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            new_nodes.append(node)
+            continue
+
+        text = node.text
+
+        matches = extract_markdown_links(text)
+
+        if not matches:
+            new_nodes.append(node)
+            continue
+
+        for match in matches:
+            before, after = text.split(f"[{match[0]}]({match[1]})", 1)
+            new_nodes.append(TextNode(before, TextType.TEXT))
+            new_nodes.append(TextNode(match[0], TextType.LINK, match[1]))
+            text = after
+
+        if text:
+            new_nodes.append(TextNode(text, TextType.TEXT))
+
+    return new_nodes
