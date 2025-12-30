@@ -1,14 +1,15 @@
 import os
 import shutil
+import sys
 
 from block_markdown import markdown_to_html_node
 
 
-def copy_static_files():
-    if os.path.exists("public"):
-        shutil.rmtree("public")
+def copy_static_files(target_dir: str):
+    if os.path.exists(target_dir):
+        shutil.rmtree(target_dir)
 
-    os.makedirs("public")
+    os.makedirs(target_dir)
 
     queue = ["static"]
 
@@ -18,7 +19,7 @@ def copy_static_files():
             if os.path.isdir(os.path.join(current_dir, file)):
                 queue.append(os.path.join(current_dir, file))
             else:
-                target_dir = os.path.join("public", current_dir.replace("static", "").lstrip("/"))
+                target_dir = os.path.join(target_dir, current_dir.replace("static", "").lstrip("/"))
 
                 if not os.path.exists(target_dir):
                     os.makedirs(target_dir)
@@ -33,8 +34,8 @@ def extract_title(markdown: str) -> str:
 
     raise ValueError("No title found in markdown")
 
-def generate_page(from_path: str, template_path: str, dest_path: str):
-    print(f"Generating page from {from_path} to {dest_path} using template_path {template_path}")
+def generate_page(from_path: str, template_path: str, dest_path: str, basepath: str):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
 
     with open(from_path, "r") as f:
         markdown = f.read()
@@ -48,12 +49,12 @@ def generate_page(from_path: str, template_path: str, dest_path: str):
 
     title = extract_title(markdown)
 
-    result = template.replace("{{ Content }}", content).replace("{{ Title }}", title)
+    result = template.replace("{{ Content }}", content).replace("{{ Title }}", title).replace('href="/', f'href="{basepath}').replace('src="/', f'src="{basepath}')
 
     with open(dest_path, "w") as f:
         f.write(result)
 
-def generate_pages_recursive(dir_path_content: str, template_path: str, dest_dir_path: str):
+def generate_pages_recursive(dir_path_content: str, template_path: str, dest_dir_path: str, basepath: str):
     queue = [dir_path_content]
 
     while queue:
@@ -68,12 +69,14 @@ def generate_pages_recursive(dir_path_content: str, template_path: str, dest_dir
                     parent_dir = os.path.dirname(target_path)
                     if not os.path.exists(parent_dir):
                         os.makedirs(parent_dir)
-                    generate_page(os.path.join(current_dir, file), template_path, target_path)
+                    generate_page(os.path.join(current_dir, file), template_path, target_path, basepath)
 
 def main():
-    copy_static_files()
+    basepath = sys.argv[1] if len(sys.argv) > 1 else "/"
 
-    generate_pages_recursive("content", "template.html", "public")
+    copy_static_files("docs")
+
+    generate_pages_recursive("content", "template.html", "docs", basepath)
 
 
 if __name__ == "__main__":
