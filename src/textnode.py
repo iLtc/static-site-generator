@@ -3,15 +3,15 @@ from enum import Enum
 
 class TextType(Enum):
     TEXT = "text"
-    BOLD_TEXT = "bold_text"
-    ITALIC_TEXT = "italic_text"
-    CODE_TEXT = "code_text"
+    BOLD = "bold"
+    ITALIC = "italic"
+    CODE = "code"
     LINK = "link"
     IMAGE = "image"
 
 
 class TextNode:
-    def __init__(self, text: str, text_type: TextType, url: str):
+    def __init__(self, text: str, text_type: TextType, url: str = None):
         self.text = text
         self.text_type = text_type
         self.url = url
